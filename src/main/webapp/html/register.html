@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>用户注册</title>
+    <link href="../css/register.css" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<h3>请填写注册信息</h3>
+<div>
+    <form id="registerForm" enctype="multipart/form-data" method="post" action="../Register">
+        <label for="username">用户名</label>
+        <input type="text" id="username" name="username" placeholder="用户名...">
+        <span id="usernameError" class="error-message"></span>
+
+
+        <label for="password1">密码</label>
+        <div class="password-container">
+            <input type="password" id="password1" name="password1" placeholder="密码...">
+            <i class="fas fa-eye password-toggle-icon" id="togglePassword1"></i>
+        </div>
+        <span id="password1Error" class="error-message"></span>
+
+        <label for="password2">密码确认</label>
+        <div class="password-container">
+            <input type="password" id="password2" name="password2" placeholder="密码...">
+            <i class="fas fa-eye password-toggle-icon" id="togglePassword2"></i>
+        </div>
+        <span id="password2Error" class="error-message"></span>
+
+        <label for="phone">电话号码</label>
+        <input type="text" id="phone" name="phone" placeholder="电话号码...">
+        <span id="phoneError" class="error-message"></span>
+        <div class="radio-group">
+            <p>性别：
+                <input type="radio" value="boy" name="gender" checked/>男
+                <input type="radio" value="girl" name="gender"/>女
+            </p>
+            <span id="genderError" class="error-message"></span>
+        </div>
+        <div class="checkbox-group">
+            <p>爱好：
+                <input type="checkbox" value="reading" name="hobby" checked/>读书
+                <input type="checkbox" value="running" name="hobby"/>跑步
+                <input type="checkbox" value="chatting" name="hobby"/>聊天
+                <input type="checkbox" value="traveling" name="hobby"/>旅游
+
+            </p>
+            <span id="hobbyError" class="error-message"></span>
+        </div>
+        <label for="photo">头像</label>
+        <input type="file" multiple accept="image/*" id="photo" name="photo" placeholder="选择头像文件...">
+        <input type="submit" value="提交">
+    </form>
+</div>
+</body>
+</html>
+<script src="../js/register.js"></script>
