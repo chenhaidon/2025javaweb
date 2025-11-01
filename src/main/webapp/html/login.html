@@ -7,22 +7,81 @@
 </head>
 <body>
 <h3>请登录</h3>
-<div>
-    <form enctype="application/x-www-form-urlencoded" method="post" action="../Login">
-        <label for="username">用户名</label>
-        <input type="text" id="username" name="username" placeholder="用户名...">
+<div class="login-container">
+    <h2 class="login-title">用户登录</h2>
 
-        <label for="password">密码</label>
-        <input type="password" id="password" name="password" placeholder="密码...">
+    <div class="error-message" id="errorMessage"></div>
 
-        <label for="usertype">用户类型</label>
-        <select id="usertype" name="usertype">
-            <option value="admin">管理员</option>
-            <option value="user">普通用户</option>
-        </select>
+    <form id="loginForm" action="../Login" method="post">
+        <!-- 隐藏字段，存储登录后跳转的目标页面 -->1
+        <input  name="redirect" id="redirectInput" value="index.html">11
+        <input name="productId" id="productIdInput" value="">222
 
-        <input type="submit" value="提交">
+        <div class="form-group">
+            <label for="username">用户名</label>
+            <input type="text" id="username" name="username" required placeholder="请输入用户名">
+        </div>
+
+        <div class="form-group">
+            <label for="password">密码</label>
+            <input type="password" id="password" name="password" required placeholder="请输入密码">
+        </div>
+
+        <div class="form-group">
+            <label>用户类型</label>
+            <div class="user-type">
+                <label>
+                    <input type="radio" name="usertype" value="user" checked> 普通用户
+                </label>
+                <label>
+                    <input type="radio" name="usertype" value="admin"> 管理员
+                </label>
+            </div>
+        </div>
+
+        <button type="submit">登录</button>
+
+        <div class="register-link">
+            还没有账号？<a href="register.html">立即注册</a>
+        </div>
     </form>
 </div>
 </body>
 </html>
+<script>
+    // 获取URL参数
+    function getUrlParams() {
+        const params = {};
+        const queryString = window.location.search.substring(1);
+        const paramPairs = queryString.split('&');
+
+        for (const pair of paramPairs) {
+            const [key, value] = pair.split('=');
+            if (key) {
+                params[key] = decodeURIComponent(value || '');
+            }
+        }
+        return params;
+    }
+    // 页面加载时初始化表单
+    document.addEventListener('DOMContentLoaded', () => {
+        const params = getUrlParams();
+
+        // 设置跳转目标
+        if (params.redirect) {
+            document.getElementById('redirectInput').value = params.redirect;
+        }
+
+        // 设置商品ID
+        if (params.productId) {
+            document.getElementById('productIdInput').value = params.productId;
+        }
+
+        // 显示错误信息
+        if (params.error) {
+            const errorElement = document.getElementById('errorMessage');
+            errorElement.textContent = params.error;
+            errorElement.style.display = 'block';
+        }
+    });
+</script>
