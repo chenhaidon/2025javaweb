@@ -3,19 +3,22 @@
 <head>
     <meta charset="utf-8">
     <title>Java Web 程序设计</title>
-    <link href="../css/login.css" rel="stylesheet" type="text/css" />
+    <link href="../css/login.css" rel="stylesheet" type="text/css"/>
 </head>
 <body>
-<h3>请登录</h3>
+<!--&lt;!&ndash; 顶部标题容器 &ndash;&gt;-->
+<!--<div class="header">-->
+<!--    <h3>请填写注册信息</h3>-->
+<!--</div>-->
 <div class="login-container">
     <h2 class="login-title">用户登录</h2>
 
     <div class="error-message" id="errorMessage"></div>
 
-    <form id="loginForm" action="../Login" method="post">
-        <!-- 隐藏字段，存储登录后跳转的目标页面 -->1
-        <input  name="redirect" id="redirectInput" value="index.html">11
-        <input name="productId" id="productIdInput" value="">222
+    <form id="loginForm" action="/Login" method="post">
+        <!-- 隐藏字段，存储登录后跳转的目标页面 -->
+        <input name="redirect" id="redirectInput" value="" hidden="hidden">
+        <input name="productId" id="productIdInput" value="" hidden="hidden">
 
         <div class="form-group">
             <label for="username">用户名</label>
@@ -63,6 +66,7 @@
         }
         return params;
     }
+
     // 页面加载时初始化表单
     document.addEventListener('DOMContentLoaded', () => {
         const params = getUrlParams();

@@ -1,30 +1,201 @@
-input[type=text], input[type=password], input[type=file],p,  select {
-  width: 100%;
-  padding: 12px 20px;
-  margin: 8px 0;
-  display: inline-block;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+/* === 全局样式重置与基础设定 === */
+* {
+  margin: 0;
+  padding: 0;
   box-sizing: border-box;
+  /* 使用现代无衬线字体 */
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
-input[type=submit] {
-  width: 100%;
-  background-color: #4CAF50;
-  color: white;
-  padding: 14px 20px;
-  margin: 8px 0;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-input[type=submit]:hover {
-  background-color: #45a049;
-}
-
-div {
-  border-radius: 5px;
-  background-color: #f2f2f2;
+body {
+  /* 浅灰色背景，营造简洁氛围 */
+  background-color: #f0f2f5;
+  /* 让 body 成为 flex 容器，使登录卡片垂直水平居中 */
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* 添加一些内边距，防止在小屏幕上内容贴边 */
   padding: 20px;
+}
+
+/* === 顶部标题容器 === */
+/* 你的 HTML 中有一个额外的 .header，但在登录页面中通常不需要它。
+   如果需要保留，请取消下面注释并调整样式。
+   建议直接使用 .login-container 内的标题。
+*/
+
+.header {
+    position: absolute;
+    top: 20px;
+    width: 100%;
+    text-align: center;
+}
+.header h3 {
+    color: #333;
+    font-size: 24px;
+}
+
+
+/* === 登录容器卡片样式 === */
+.login-container {
+  width: 100%;
+  max-width: 400px; /* 限制卡片最大宽度 */
+  background-color: #ffffff;
+  padding: 40px 30px;
+  border-radius: 12px; /* 圆润的 corners */
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05); /*  subtle 阴影 */
+  text-align: center;
+}
+
+/* === 标题样式 === */
+.login-title {
+  color: #1a237e; /* 深蓝色标题，突出主题 */
+  margin-bottom: 30px;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+/* === 错误信息样式 === */
+.error-message {
+  background-color: #fee2e2;
+  color: #dc2626;
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  display: none; /* 默认隐藏 */
+  font-size: 14px;
+}
+
+/* === 表单组样式 === */
+.form-group {
+  margin-bottom: 25px;
+  text-align: left; /* 标签和输入框左对齐 */
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #475569; /* 深灰色文字，提高可读性 */
+  font-size: 14px;
+}
+
+/* === 输入框样式 === */
+input[type="text"],
+input[type="password"] {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #e2e8f0; /* 浅灰色边框 */
+  border-radius: 8px;
+  font-size: 16px;
+  transition: all 0.2s ease-in-out;
+}
+
+/* 输入框聚焦效果 */
+input[type="text"]:focus,
+input[type="password"]:focus {
+  outline: none;
+  border-color: #3b82f6; /* 蓝色边框高亮 */
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); /* 轻微的发光效果 */
+}
+
+/* === 用户类型选择样式 === */
+.user-type {
+  display: flex;
+  justify-content: center; /* 单选框组水平居中 */
+  gap: 20px; /* 选项之间的间距 */
+}
+
+.user-type label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-weight: normal;
+}
+
+/* 美化单选框 */
+input[type="radio"] {
+  /* 隐藏原生单选框 */
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  margin-right: 8px;
+  border: 2px solid #cbd5e1;
+  border-radius: 50%;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+/* 单选框选中状态 */
+input[type="radio"]:checked {
+  border-color: #3b82f6;
+  background-color: #3b82f6;
+}
+
+input[type="radio"]:checked::after {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: white;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* === 提交按钮样式 === */
+button[type="submit"] {
+  width: 100%;
+  padding: 14px;
+  background-color: #3b82f6; /* 蓝色主按钮 */
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(59, 130, 246, 0.1);
+}
+
+button[type="submit"]:hover {
+  background-color: #2563eb; /* 加深蓝色，提供反馈 */
+  box-shadow: 0 6px 12px rgba(59, 130, 246, 0.15);
+  transform: translateY(-2px);
+}
+
+button[type="submit"]:active {
+  transform: translateY(0);
+}
+
+/* === 注册链接样式 === */
+.register-link {
+  margin-top: 25px;
+  font-size: 14px;
+  color: #64748b;
+}
+
+.register-link a {
+  color: #3b82f6;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.register-link a:hover {
+  text-decoration: underline;
+}
+
+/* === 响应式调整 === */
+@media (max-width: 480px) {
+  .login-container {
+    padding: 30px 20px;
+  }
+
+  .login-title {
+    font-size: 22px;
+  }
 }

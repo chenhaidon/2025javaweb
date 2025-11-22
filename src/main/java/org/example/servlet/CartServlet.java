@@ -7,6 +7,10 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.example.entity.CartItem;
+import org.example.entity.Product;
+import org.example.Dao.ProductDao;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -14,54 +18,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-// 购物车项实体类
-class CartItem {
-    private int productId;
-    private String name;
-    private double price;
-    private int quantity;
-    private String image;
-
-    public CartItem(int productId, String name, double price, int quantity, String image) {
-        this.productId = productId;
-        this.name = name;
-        this.price = price;
-        this.quantity = quantity;
-        this.image = image;
-    }
-
-    // Getters and Setters
-    public int getProductId() { return productId; }
-    public String getName() { return name; }
-    public double getPrice() { return price; }
-    public int getQuantity() { return quantity; }
-    public void setQuantity(int quantity) { this.quantity = quantity; }
-    public String getImage() { return image; }
-}
-
 @WebServlet("/CartServlet")
 public class CartServlet extends HttpServlet {
-    // 模拟商品数据库
-    private List<Map<String, Object>> products;
-
-    @Override
-    public void init() throws ServletException {
-        products = new ArrayList<>();
-        // 初始化商品数据
-        products.add(createProduct(1, "智能手表 Pro", 1299, "https://picsum.photos/id/96/300/300"));
-        products.add(createProduct(2, "无线蓝牙耳机", 899, "https://picsum.photos/id/26/300/300"));
-        products.add(createProduct(3, "笔记本电脑支架", 129, "https://picsum.photos/id/119/300/300"));
-        products.add(createProduct(4, "机械键盘", 349, "https://picsum.photos/id/160/300/300"));
-    }
-
-    private Map<String, Object> createProduct(int id, String name, double price, String image) {
-        Map<String, Object> product = new HashMap<>();
-        product.put("id", id);
-        product.put("name", name);
-        product.put("price", price);
-        product.put("image", image);
-        return product;
-    }
+    private ProductDao productDao = new ProductDao();
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -72,16 +31,6 @@ public class CartServlet extends HttpServlet {
         Map<String, Object> result = new HashMap<>();
 
         HttpSession session = request.getSession();
-//        String username = (String) session.getAttribute("username");
-
-//        // 检查用户是否登录
-//        if (username == null || username.isEmpty()) {
-//            result.put("success", false);
-//            result.put("message", "请先登录");
-//            result.put("needLogin", true);
-//            out.print(gson.toJson(result));
-//            return;
-//        }
 
         // 获取购物车，不存在则创建
         List<CartItem> cart = (List<CartItem>) session.getAttribute("cart");
@@ -98,16 +47,20 @@ public class CartServlet extends HttpServlet {
             result.put("success", false);
             result.put("message", "商品ID不能为空");
             out.print(gson.toJson(result));
+            out.flush();
+            out.close();
             return;
         }
 
-        int productId;
+        long productId;
         try {
-            productId = Integer.parseInt(productIdStr);
+            productId = Long.parseLong(productIdStr);
         } catch (NumberFormatException e) {
             result.put("success", false);
             result.put("message", "无效的商品ID");
             out.print(gson.toJson(result));
+            out.flush();
+            out.close();
             return;
         }
 
@@ -136,6 +89,8 @@ public class CartServlet extends HttpServlet {
                 result.put("success", false);
                 result.put("message", "无效的操作");
                 out.print(gson.toJson(result));
+                out.flush();
+                out.close();
                 return;
         }
 
@@ -149,6 +104,8 @@ public class CartServlet extends HttpServlet {
         result.put("totalPrice", getTotalPrice(cart));
 
         out.print(gson.toJson(result));
+        out.flush();
+        out.close();
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -160,16 +117,6 @@ public class CartServlet extends HttpServlet {
         Map<String, Object> result = new HashMap<>();
 
         HttpSession session = request.getSession();
-//        String username = (String) session.getAttribute("username");
-
-//        // 检查用户是否登录
-//        if (username == null || username.isEmpty()) {
-//            result.put("success", false);
-//            result.put("message", "请先登录");
-//            result.put("needLogin", true);
-//            out.print(gson.toJson(result));
-//            return;
-//        }
 
         // 获取购物车
         List<CartItem> cart = (List<CartItem>) session.getAttribute("cart");
@@ -185,45 +132,45 @@ public class CartServlet extends HttpServlet {
         result.put("totalPrice", getTotalPrice(cart));
 
         out.print(gson.toJson(result));
+        out.flush();
+        out.close();
     }
 
     // 添加商品到购物车
-    private void addToCart(List<CartItem> cart, int productId, int quantity) {
-        // 查找商品信息
-        for (Map<String, Object> product : products) {
-            if ((int) product.get("id") == productId) {
-                // 检查商品是否已在购物车中
-                boolean found = false;
-                for (CartItem item : cart) {
-                    if (item.getProductId() == productId) {
-                        item.setQuantity(item.getQuantity() + quantity);
-                        found = true;
-                        break;
-                    }
+    private void addToCart(List<CartItem> cart, long productId, int quantity) {
+        // 从数据库查找商品信息
+        Product product = productDao.getProductById(productId);
+        if (product != null) {
+            // 检查商品是否已在购物车中
+            boolean found = false;
+            for (CartItem item : cart) {
+                if (item.getProductId() == productId) {
+                    item.setQuantity(item.getQuantity() + quantity);
+                    found = true;
+                    break;
                 }
+            }
 
-                // 如果不在购物车中，则添加新项
-                if (!found) {
-                    cart.add(new CartItem(
-                            productId,
-                            (String) product.get("name"),
-                            (double) product.get("price"),
-                            quantity,
-                            (String) product.get("image")
-                    ));
-                }
-                break;
+            // 如果不在购物车中，则添加新项
+            if (!found) {
+                CartItem cartItem = new CartItem();
+                cartItem.setProductId((int) productId);
+                cartItem.setName(product.getName());
+                cartItem.setPrice(product.getPrice().doubleValue());
+                cartItem.setQuantity(quantity);
+                cartItem.setImage(product.getMainImageUrl());
+                cart.add(cartItem);
             }
         }
     }
 
     // 从购物车移除商品
-    private void removeFromCart(List<CartItem> cart, int productId) {
+    private void removeFromCart(List<CartItem> cart, long productId) {
         cart.removeIf(item -> item.getProductId() == productId);
     }
 
     // 更新商品数量
-    private void updateQuantity(List<CartItem> cart, int productId, int quantity) {
+    private void updateQuantity(List<CartItem> cart, long productId, int quantity) {
         if (quantity <= 0) {
             removeFromCart(cart, productId);
             return;

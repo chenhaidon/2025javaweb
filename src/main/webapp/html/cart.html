@@ -162,6 +162,7 @@
         /* 返回主页按钮样式 */
         .back-home-container {
             margin: 20px 0;
+            text-align: right;
         }
 
         .back-home-btn {
@@ -176,6 +177,7 @@
             cursor: pointer;
             font-size: 14px;
             transition: all 0.2s;
+            text-decoration: none;
         }
 
         .back-home-btn:hover {
@@ -186,10 +188,29 @@
         .back-home-btn i {
             font-size: 16px;
         }
+        
+        /* 用户欢迎区域样式 */
+        .user-welcome {
+            background-color: #e3f2fd;
+            padding: 10px 20px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
     </style>
 </head>
 <body>
 <h1 class="page-title">购物车结算</h1>
+
+<!-- 用户欢迎区域 -->
+<div class="user-welcome">
+    <div>你好，<span id="welcomeUsername">用户</span></div>
+    <a href="/products" class="back-home-btn">
+        <i class="fa fa-home"></i> 返回主页
+    </a>
+</div>
 
 <div class="cart-container">
     <div class="cart-header">
@@ -202,12 +223,7 @@
     <div id="cartItems">
         <!-- 购物车商品将通过JavaScript动态生成 -->
     </div>
-    <!-- 在购物车页面的合适位置（如标题附近或页面底部）添加返回按钮 -->
-    <div class="back-home-container">
-        <button class="back-home-btn" onclick="window.location.href=`index.html?username=${username}`">
-            <i class="fa fa-home"></i> 返回主页
-        </button>
-    </div>
+    
     <div class="cart-summary">
         <div class="total-amount">
             总计: <span id="totalPrice">¥0.00</span>
@@ -217,6 +233,24 @@
 </div>
 
 <script>
+    // 设置欢迎词中的用户名
+    function setWelcomeUsername() {
+        // 从sessionStorage中获取用户名（如果之前已保存）
+        const username = sessionStorage.getItem('username');
+        if (username) {
+            document.getElementById('welcomeUsername').textContent = username;
+        } else {
+            // 尝试从URL参数获取用户名
+            const urlParams = new URLSearchParams(window.location.search);
+            const usernameParam = urlParams.get('username');
+            if (usernameParam) {
+                document.getElementById('welcomeUsername').textContent = usernameParam;
+                // 保存到sessionStorage供后续使用
+                sessionStorage.setItem('username', usernameParam);
+            }
+        }
+    }
+
      let username="";
     // 解析URL参数
     function getUrlParams() {
@@ -242,19 +276,41 @@
         if (params.productId) {
             try {
                 // 添加商品到购物车
-                await fetch('/CartServlet', {
+                const response = await fetch('/CartServlet', {
                     method: 'POST',
                     credentials: 'include',
                     headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Requested-With': 'XMLHttpRequest'
                     },
                     body: `action=add&productId=${params.productId}&quantity=1`
                 });
+                
+                // 检查响应的内容类型
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.indexOf("application/json") !== -1) {
+                    const data = await response.json();
+                    if (!data.success) {
+                        if (data.needLogin) {
+                            // 用户未登录，跳转到登录页
+                            window.location.href = `login.html?redirect=cart.html&productId=${params.productId}`;
+                            return;
+                        } else {
+                            alert('添加商品到购物车失败: ' + data.message);
+                        }
+                    }
+                } else {
+                    // 如果不是JSON响应，可能是重定向到登录页
+                    window.location.href = `login.html?redirect=cart.html&productId=${params.productId}`;
+                }
 
                 // 移除URL中的productId参数，避免刷新页面重复添加
                 // window.history.replaceState({}, document.title, window.location.pathname);
             } catch (error) {
                 console.error('添加商品到购物车失败:', error);
+                // 出现错误时跳转到登录页
+                const params = getUrlParams();
+                window.location.href = `login.html?redirect=cart.html&productId=${params.productId || ''}`;
             }
         }
     }
@@ -264,21 +320,38 @@
         try {
             const response = await fetch('/CartServlet', {
                 method: 'GET',
-                credentials: 'include'
-            });
-            const data = await response.json();
-            console.log(data)
-            if (!data.success) {
-                if (data.needLogin) {
-                    // 用户未登录，跳转到登录页
-                    window.location.href = `login.html?redirect=cart.html`;
-                } else {
-                    alert('加载购物车失败: ' + data.message);
+                credentials: 'include',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
                 }
-                return;
-            }
+            });
+            
+            // 检查响应的内容类型
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.indexOf("application/json") !== -1) {
+                const data = await response.json();
+                console.log(data)
+                if (!data.success) {
+                    if (data.needLogin) {
+                        // 用户未登录，跳转到登录页
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const productId = urlParams.get('productId');
+                        let redirectUrl = 'login.html?redirect=cart.html';
+                        if (productId) {
+                            redirectUrl += '&productId=' + productId;
+                        }
+                        window.location.href = redirectUrl;
+                    } else {
+                        alert('加载购物车失败: ' + data.message);
+                    }
+                    return;
+                }
 
-            renderCart(data.cartItems, data.totalPrice);
+                renderCart(data.cartItems, data.totalPrice);
+            } else {
+                // 如果不是JSON响应，可能是重定向到登录页
+                window.location.href = 'login.html?redirect=cart.html';
+            }
         } catch (error) {
             console.error('加载购物车数据失败:', error);
             alert('加载购物车时发生错误');
@@ -294,7 +367,7 @@
             cartItemsContainer.innerHTML = `
                     <div class="empty-cart">
                         <p>您的购物车是空的</p>
-                        <a href="index.html?username=${username}">继续购物</a>
+                        <a href="../index.jsp">继续购物</a>
                     </div>
                 `;
             totalPriceElement.textContent = '¥0.00';
@@ -339,16 +412,24 @@
                 method: 'POST',
                 credentials: 'include',
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
                 body: `action=remove&productId=${productId}`
             });
 
-            const data = await response.json();
-            if (data.success) {
-                renderCart(data.cartItems, data.totalPrice);
+            // 检查响应的内容类型
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.indexOf("application/json") !== -1) {
+                const data = await response.json();
+                if (data.success) {
+                    renderCart(data.cartItems, data.totalPrice);
+                } else {
+                    alert('操作失败: ' + data.message);
+                }
             } else {
-                alert('操作失败: ' + data.message);
+                // 如果不是JSON响应，可能是重定向到登录页
+                window.location.href = 'login.html?redirect=cart.html';
             }
         } catch (error) {
             console.error('移除商品失败:', error);
@@ -370,16 +451,24 @@
                     method: 'POST',
                     credentials: 'include',
                     headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Requested-With': 'XMLHttpRequest'
                     },
                     body: `action=update&productId=${productId}&quantity=${newQuantity}`
                 });
 
-                const data = await response.json();
-                if (data.success) {
-                    renderCart(data.cartItems, data.totalPrice);
+                // 检查响应的内容类型
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.indexOf("application/json") !== -1) {
+                    const data = await response.json();
+                    if (data.success) {
+                        renderCart(data.cartItems, data.totalPrice);
+                    } else {
+                        alert('操作失败: ' + data.message);
+                    }
                 } else {
-                    alert('操作失败: ' + data.message);
+                    // 如果不是JSON响应，可能是重定向到登录页
+                    window.location.href = 'login.html?redirect=cart.html';
                 }
             }
         } catch (error) {
@@ -397,16 +486,24 @@
                 method: 'POST',
                 credentials: 'include',
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
                 body: `action=update&productId=${productId}&quantity=${quantity}`
             });
 
-            const data = await response.json();
-            if (data.success) {
-                renderCart(data.cartItems, data.totalPrice);
+            // 检查响应的内容类型
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.indexOf("application/json") !== -1) {
+                const data = await response.json();
+                if (data.success) {
+                    renderCart(data.cartItems, data.totalPrice);
+                } else {
+                    alert('操作失败: ' + data.message);
+                }
             } else {
-                alert('操作失败: ' + data.message);
+                // 如果不是JSON响应，可能是重定向到登录页
+                window.location.href = 'login.html?redirect=cart.html';
             }
         } catch (error) {
             console.error('设置数量失败:', error);
@@ -428,6 +525,8 @@
 
     // 页面加载完成后执行
     document.addEventListener('DOMContentLoaded', async () => {
+        // 设置欢迎用户名
+        setWelcomeUsername();
         // 检查是否有需要添加的商品
         await checkAndAddProduct();
         // 加载购物车数据

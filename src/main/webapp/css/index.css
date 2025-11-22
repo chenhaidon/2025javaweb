@@ -112,3 +112,124 @@ body {
 .buy-button:hover {
     background-color: #3367d6;
 }
+
+/* 新增的购物车按钮样式 */
+.cart-button {
+    width: 100%;
+    padding: 10px;
+    background-color: #2ecc71;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 10px;
+}
+
+.cart-button:hover {
+    background-color: #27ae60;
+}
+
+/* index.jsp 中的产品容器样式 */
+.product-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 20px;
+}
+
+/* index.jsp 中的产品卡片样式 */
+.product-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    width: 250px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* index.jsp 中的产品图片样式 */
+.product-image {
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+}
+
+/* index.jsp 中的产品名称样式 */
+.product-name {
+    font-size: 18px;
+    font-weight: bold;
+    margin: 10px 0;
+}
+
+/* index.jsp 中的产品价格样式 */
+.product-price {
+    color: #e74c3c;
+    font-size: 20px;
+    font-weight: bold;
+    margin: 10px 0;
+}
+
+/* index.jsp 中的头部样式 */
+.header {
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+/* index.jsp 中的用户名样式 */
+.bg-white\/20 {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.px-2 {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+
+.py-1 {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+}
+
+.rounded-md {
+    border-radius: 0.375rem;
+}
+
+.relative {
+    position: relative;
+}
+
+.inline-block {
+    display: inline-block;
+}
+
+.absolute {
+    position: absolute;
+}
+
+.bottom-1 {
+    bottom: 0.25rem;
+}
+
+.left-0 {
+    left: 0;
+}
+
+.w-full {
+    width: 100%;
+}
+
+.h-1 {
+    height: 0.25rem;
+}
+
+.bg-white\/40 {
+    background-color: rgba(255, 255, 255, 0.4);
+}
+
+.rounded-full {
+    border-radius: 9999px;
+}
