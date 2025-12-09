@@ -35,12 +35,34 @@ public class ProductDao {
     }
 
     /**
-     * 从数据库获取所有商品
+     * 删除商品（标记为已删除）
+     * @param id 商品ID
+     * @return 是否删除成功
+     */
+    public boolean deleteProduct(long id) {
+        String sql = "UPDATE products SET deleted = 1 WHERE id = ?";
+        try (Connection conn = DruidUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            System.out.println("执行SQL: " + sql);
+            System.out.println("参数ID: " + id);
+            pstmt.setLong(1, id);
+            int affectedRows = pstmt.executeUpdate();
+            System.out.println("受影响的行数: " + affectedRows);
+            return affectedRows > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    /**
+     * 从数据库获取所有未删除的商品
      * @return 商品列表
      */
     public List<Product> getAllProducts() {
         List<Product> products = new ArrayList<>();
-        String sql = "SELECT id, name, price, main_image_url FROM products ORDER BY id DESC";
+        String sql = "SELECT id, name, price, main_image_url FROM products WHERE deleted = 0 ORDER BY id DESC";
         
         try (Connection conn = DruidUtil.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql);

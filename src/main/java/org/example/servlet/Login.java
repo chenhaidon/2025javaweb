@@ -23,10 +23,15 @@ public class Login extends HttpServlet {
         String username = request.getParameter("username");
         String password = request.getParameter("password");
         String usertype = request.getParameter("usertype");
-        // 获取登录后跳转的目标页面，默认为首页
+        // 获取登录后跳转的目标页面，默认根据用户类型确定
         String redirect = request.getParameter("redirect");
         if (redirect == null || redirect.isEmpty()) {
-            redirect = "products";
+            // 根据用户类型确定默认跳转页面
+            if ("admin".equals(usertype) || "superadmin".equals(usertype)) {
+                redirect = "manage/products"; // 管理员跳转到商品管理页面
+            } else {
+                redirect = "products"; // 普通用户跳转到商品首页
+            }
         }
         // 获取可能需要添加到购物车的商品ID
         String productId = request.getParameter("productId");
@@ -51,20 +56,22 @@ public class Login extends HttpServlet {
             session.setAttribute("loginTime", now.format(formatter));
             session.setAttribute("loginIp", request.getRemoteAddr());
 
+            // 设置用户权限
+            int role = 0; // 默认为普通用户
+            if ("admin".equals(usertype)) {
+                role = 1; // 管理员
+            } else if ("superadmin".equals(usertype)) {
+                role = 2; // 超级管理员
+            }
+            session.setAttribute("role", role);
+
             // 登录成功后，如果有商品ID则跳转到购物车页面并添加商品
             if (productId != null && !productId.isEmpty()) {
                 // 如果有商品ID，则跳转到购物车页面
-                response.sendRedirect("html/cart.html?productId=" + productId + "&username=" + username);
+                response.sendRedirect("html/cart.html?productId=" + productId);
             } else {
                 // 否则跳转到指定页面
-                // 确保重定向路径正确
-                String redirectPath =  redirect;
-                if (!redirect.contains("?")) {
-                    redirectPath += "?username=" + username;
-                } else {
-                    redirectPath += "&username=" + username;
-                }
-                response.sendRedirect(redirectPath);
+                response.sendRedirect(redirect);
             }
         } else {
             // 登录失败，重定向回登录页并提示错误

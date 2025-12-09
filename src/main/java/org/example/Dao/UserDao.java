@@ -17,7 +17,7 @@ public class UserDao {
         int user_id;
 
         try {
-            PreparedStatement pstmt1 = conn.prepareStatement("INSERT INTO user(name,password,gender, phone, hobby) VALUES (?, ?, ?, ?, ?)"
+            PreparedStatement pstmt1 = conn.prepareStatement("INSERT INTO user(name,password,gender, phone, hobby, role) VALUES (?, ?, ?, ?, ?, ?)"
                     , PreparedStatement.RETURN_GENERATED_KEYS);
             PreparedStatement pstmt2 = conn.prepareStatement("INSERT INTO photo(user_id,image) VALUES ( ?, ?)"
             );
@@ -27,6 +27,7 @@ public class UserDao {
             pstmt1.setString(3, user.getGender());
             pstmt1.setString(4, user.getPhone());
             pstmt1.setString(5, user.getHobby());
+            pstmt1.setInt(6, user.getRole()); // 添加权限字段
             pstmt1.execute();
             ResultSet generatedKeys = pstmt1.getGeneratedKeys();
             if (generatedKeys.next()) {
@@ -61,7 +62,7 @@ public class UserDao {
 
         try {
             conn = DruidUtil.getConnection();
-            String sql = "select u.id, u.name, u.password, u.gender, u.phone, u.hobby, p.image from user u join photo p on u.id = p.user_id where u.id=? limit 1";
+            String sql = "select u.id, u.name, u.password, u.gender, u.phone, u.hobby, u.role, p.image from user u join photo p on u.id = p.user_id where u.id=? limit 1";
             pstmt1 = conn.prepareStatement(sql);
             pstmt1.setInt(1, userId);
             rs = pstmt1.executeQuery();
@@ -74,6 +75,7 @@ public class UserDao {
                 user.setGender(rs.getString("gender"));
                 user.setPhone(rs.getString("phone"));
                 user.setHobby(rs.getString("hobby"));
+                user.setRole(rs.getInt("role")); // 添加权限字段
                 byte[] imageBytes = rs.getBytes("image");
                 List<byte[]> avatarList = new ArrayList<>();
                 avatarList.add(imageBytes);
@@ -99,6 +101,5 @@ public class UserDao {
         }
 
         return user; // 返回 User 对象，而不是 ResultSet
-
     }
 }

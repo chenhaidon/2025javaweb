@@ -23,4 +23,13 @@ public class ProductService {
     public List<Product> getAllProducts() {
         return productDao.getAllProducts();
     }
+    
+    /**
+     * 删除商品
+     * @param id 商品ID
+     * @return 是否删除成功
+     */
+    public boolean deleteProduct(long id) {
+        return productDao.deleteProduct(id);
+    }
 }

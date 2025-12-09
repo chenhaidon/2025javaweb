@@ -12,6 +12,9 @@ public class User {
     private String gender;
     private String hobby;
     private List<byte[]> avatar;
+    
+    // 权限字段：0-普通用户、1-管理员、2-超级管理员
+    private int role = 0;
 
     // 构造方法、getter和setter方法
 
@@ -82,5 +85,13 @@ public class User {
 
     public void setGender(String gender) {
         this.gender = gender;
+    }
+
+    public int getRole() {
+        return role;
+    }
+
+    public void setRole(int role) {
+        this.role = role;
     }
 }

@@ -239,15 +239,55 @@
         const username = sessionStorage.getItem('username');
         if (username) {
             document.getElementById('welcomeUsername').textContent = username;
+            // 即使从sessionStorage获取了用户名，也需要设置主页链接
+            // 我们需要再次获取用户角色信息
+            fetch('/UserServlet', {
+                method: 'GET',
+                credentials: 'include'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.role !== undefined) {
+                    // 根据用户角色设置返回主页链接
+                    setHomeLinkByRole(data.role);
+                }
+            })
+            .catch(error => {
+                console.error('获取用户角色失败:', error);
+                // 出错时默认跳转到普通用户页面
+                setHomeLinkByRole(0);
+            });
         } else {
-            // 尝试从URL参数获取用户名
-            const urlParams = new URLSearchParams(window.location.search);
-            const usernameParam = urlParams.get('username');
-            if (usernameParam) {
-                document.getElementById('welcomeUsername').textContent = usernameParam;
-                // 保存到sessionStorage供后续使用
-                sessionStorage.setItem('username', usernameParam);
-            }
+            // 通过AJAX从服务器获取用户名
+            fetch('/UserServlet', {
+                method: 'GET',
+                credentials: 'include'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.username) {
+                    document.getElementById('welcomeUsername').textContent = data.username;
+                    // 保存到sessionStorage供后续使用
+                    sessionStorage.setItem('username', data.username);
+                    // 根据用户角色设置返回主页链接
+                    setHomeLinkByRole(data.role);
+                }
+            })
+            .catch(error => {
+                console.error('获取用户名失败:', error);
+            });
+        }
+    }
+
+    // 根据用户角色设置返回主页链接
+    function setHomeLinkByRole(role) {
+        const homeLink = document.querySelector('.back-home-btn');
+        if (role >= 1) {
+            // 管理员或超级管理员跳转到管理页面
+            homeLink.href = '/manage/products';
+        } else {
+            // 普通用户跳转到普通商品页面
+            homeLink.href = '/products';
         }
     }
 
@@ -293,7 +333,7 @@
                     if (!data.success) {
                         if (data.needLogin) {
                             // 用户未登录，跳转到登录页
-                            window.location.href = `login.html?redirect=cart.html&productId=${params.productId}`;
+                            window.location.href = `login.html?redirect=html/cart.html&productId=${params.productId}`;
                             return;
                         } else {
                             alert('添加商品到购物车失败: ' + data.message);
@@ -301,7 +341,7 @@
                     }
                 } else {
                     // 如果不是JSON响应，可能是重定向到登录页
-                    window.location.href = `login.html?redirect=cart.html&productId=${params.productId}`;
+                    window.location.href = `login.html?redirect=html/cart.html&productId=${params.productId}`;
                 }
 
                 // 移除URL中的productId参数，避免刷新页面重复添加
@@ -310,7 +350,7 @@
                 console.error('添加商品到购物车失败:', error);
                 // 出现错误时跳转到登录页
                 const params = getUrlParams();
-                window.location.href = `login.html?redirect=cart.html&productId=${params.productId || ''}`;
+                window.location.href = `login.html?redirect=html/cart.html&productId=${params.productId || ''}`;
             }
         }
     }
@@ -336,7 +376,7 @@
                         // 用户未登录，跳转到登录页
                         const urlParams = new URLSearchParams(window.location.search);
                         const productId = urlParams.get('productId');
-                        let redirectUrl = 'login.html?redirect=cart.html';
+                        let redirectUrl = 'login.html?redirect=html/cart.html';
                         if (productId) {
                             redirectUrl += '&productId=' + productId;
                         }
@@ -350,7 +390,7 @@
                 renderCart(data.cartItems, data.totalPrice);
             } else {
                 // 如果不是JSON响应，可能是重定向到登录页
-                window.location.href = 'login.html?redirect=cart.html';
+                window.location.href = 'login.html?redirect=html/cart.html';
             }
         } catch (error) {
             console.error('加载购物车数据失败:', error);
@@ -429,7 +469,7 @@
                 }
             } else {
                 // 如果不是JSON响应，可能是重定向到登录页
-                window.location.href = 'login.html?redirect=cart.html';
+                window.location.href = 'login.html?redirect=html/cart.html';
             }
         } catch (error) {
             console.error('移除商品失败:', error);
@@ -468,7 +508,7 @@
                     }
                 } else {
                     // 如果不是JSON响应，可能是重定向到登录页
-                    window.location.href = 'login.html?redirect=cart.html';
+                    window.location.href = 'login.html?redirect=html/cart.html';
                 }
             }
         } catch (error) {
@@ -503,7 +543,7 @@
                 }
             } else {
                 // 如果不是JSON响应，可能是重定向到登录页
-                window.location.href = 'login.html?redirect=cart.html';
+                window.location.href = 'login.html?redirect=html/cart.html';
             }
         } catch (error) {
             console.error('设置数量失败:', error);
